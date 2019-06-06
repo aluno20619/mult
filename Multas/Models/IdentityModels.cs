@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System.Data.Entity;
+using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -21,7 +22,7 @@ namespace Multas.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext()
-            : base("DefaultConnection", throwIfV1Schema: false)
+            : base("MultasDbConnectionString", throwIfV1Schema: false)
         {
         }
 
@@ -35,6 +36,20 @@ namespace Multas.Models
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();
+        }
+        // definir as tabelas da BD
+        public virtual DbSet<Condutores> Condutores { get; set; }
+        public virtual DbSet<Viaturas> Viaturas { get; set; }
+        public virtual DbSet<Agentes> Agentes { get; set; }
+        public virtual DbSet<Multas> Multas { get; set; }
+
+        // método a ser executado no início da criação do Modelo
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            // eliminar a convenção de atribuir automaticamente o 'on Delete Cascade' nas FKs
+            modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
+            modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

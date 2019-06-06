@@ -39,6 +39,7 @@ namespace Multas.Controllers
         // GET: /Account/Login
         [HttpGet]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public ActionResult Login(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;

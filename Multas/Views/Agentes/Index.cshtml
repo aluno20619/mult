@@ -1,14 +1,14 @@
 ﻿@model IEnumerable<Multas.Models.Agentes>
 
 @{
-   ViewBag.Title = "Agentes";
+    ViewBag.Title = "Agentes";
 }
 
 <h2>Listagem de Agentes</h2>
-
+ @if (User.IsInRole("Recurso Humanos")) { 
 <p>
    @Html.ActionLink("Novo Agente", "Create")
-</p>
+</p>}
 <table class="table">
    <tr>
       <th>
@@ -23,7 +23,7 @@
       <th></th>
    </tr>
 
-   @foreach(var agente in Model) {
+   @foreach (var agente in Model) {
       <tr>
          <td>
             @Html.DisplayFor(modelItem => agente.Nome)
@@ -41,9 +41,17 @@
             @*@Html.DisplayFor(modelItem => item.Fotografia)*@
          </td>
          <td>
-            @Html.ActionLink("Editar", "Edit", new { id = agente.ID }) |
-            @Html.ActionLink("Detalhes", "Details", new { id = agente.ID }) |
-            @Html.ActionLink("Apagar", "Delete", new { id = agente.ID })
+             @Html.ActionLink("Detalhes", "Details", new { id = agente.ID }) 
+             @if (User.IsInRole("Recurso Humanos"))
+             {
+             <text>
+                 |
+                 @Html.ActionLink("Editar", "Edit", new { id = agente.ID }) 
+                 |
+                 @Html.ActionLink("Apagar", "Delete", new { id = agente.ID })
+             </text>
+             }
+
          </td>
       </tr>
    }

@@ -10,15 +10,27 @@ using System.Web.Mvc;
 using Multas.Models;
 
 namespace Multas.Controllers {
+    [Authorize]
    public class AgentesController : Controller {
-      private MultasDB db = new MultasDB();
+      private ApplicationDbContext db = new ApplicationDbContext();
 
-      // GET: Agentes
-      public ActionResult Index() {
-
-         Session["Metodo"] = "";
-
-         return View(db.Agentes.ToList());
+        // GET: Agentes
+        [Authorize(Roles = "RecursosHumanos,Agente")]
+      //  [Authorize(Users ="agente@multas.pt")]
+        public ActionResult Index() {
+            var listagentes = db.Agentes.ToList();
+            if (!User.IsInRole("RecursosHumanos")) {
+                // Session["Metodo"] = "";
+                // Select Id from Agentes where userNameId=UserName da pessoa autenticada
+                int idAgente = db.Agentes.
+                    Where(a=>a.UserNameId==User.Identity.Name).
+                    FirstOrDefault()
+                    .ID;
+                    return RedirectToAction("Details",new {id= new{id=idAgente});
+            }
+         
+        
+         return View(listagentes);
       }
 
       // GET: Agentes/Details/5
@@ -31,10 +43,12 @@ namespace Multas.Controllers {
          if(agente == null) {
             return RedirectToAction("Index");
          }
+            if (User.IsInRole("RecursodHumanos") || User.IsInRole("GestorMultas") || agente.UserNameId == User.Identity.Name)
+                return View(agente);
+            else
 
-         Session["Metodo"] = "";
+                return RedirectToAction("Index");
 
-         return View(agente);
       }
 
       // GET: Agentes/Create
@@ -59,6 +73,7 @@ namespace Multas.Controllers {
 
       [HttpPost]
       [ValidateAntiForgeryToken]
+      [Authorize(Roles ="Recusos Humanos,Agente")]
       public ActionResult Create([Bind(Include = "Nome,Esquadra")] Agentes agente,
                                   HttpPostedFileBase fotografia) {
 
@@ -122,8 +137,9 @@ namespace Multas.Controllers {
          return View(agente);
       }
 
-      // GET: Agentes/Edit/5
-      public ActionResult Edit(int? id) {
+        // GET: Agentes/Edit/5
+        [Authorize(Roles = "Recusos Humanos")]
+        public ActionResult Edit(int? id) {
          if(id == null) {
             return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
          }
@@ -150,13 +166,14 @@ namespace Multas.Controllers {
 
 
 
-      // GET: Agentes/Delete/5
-      /// <summary>
-      /// mostra na view os dados de um agente para porterior, eventual, remoção
-      /// </summary>
-      /// <param name="id">identificador do agente a remover</param>
-      /// <returns></returns>
-      public ActionResult Delete(int? id) {
+        // GET: Agentes/Delete/5
+        /// <summary>
+        /// mostra na view os dados de um agente para porterior, eventual, remoção
+        /// </summary>
+        /// <param name="id">identificador do agente a remover</param>
+        /// <returns></returns>
+        [Authorize(Roles ="Recusos Humanos,Agente")]
+        public ActionResult Delete(int? id) {
 
          // o ID do agente não foi fornecido
          // não é possível procurar o Agente
